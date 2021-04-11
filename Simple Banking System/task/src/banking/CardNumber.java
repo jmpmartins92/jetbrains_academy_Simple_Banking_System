@@ -24,30 +24,35 @@ public class CardNumber extends Bank {
     private int[] completeCardNumber;
 
     /**
-     * integer that validates the credit card number using the Luhn algorithm. It will be, at this stage, always 0.
+     * integer that validates the credit card number using the Luhn algorithm.
      */
     private int checkSum;
 
     /**
-     * Default constructor for the card number, which will assume a checksum of 0, and an accountIdentifier will be
+     * number that results from applying the Luhn algorithm, necessary to calculate the checkSum (last digit) of a card
+     * number.
+     */
+    private int controlNumber;
+
+    /**
+     * Default constructor for the card number, and an accountIdentifier will be
      * randomly generated.
      */
     public CardNumber() {
         super();
         this.accountIdentifier = accountIdentifierMaker();
-        this.checkSum = 0;
         this.completeCardNumber = new int[16];
         int counter = 0;
-        for (int index = 0; index < completeCardNumber.length; index++) {
+        for (int index = 0; index < completeCardNumber.length - 1; index++) {
             if (index < 6) {
                 completeCardNumber[index] = super.getBin()[index];
-            } else if (index == 15) {
-                completeCardNumber[15] = checkSum;
             } else {
                 completeCardNumber[index] = accountIdentifier[counter];
                 counter++;
             }
         }
+        this.checkSum = checkSumMaker(completeCardNumber);
+        completeCardNumber[15] = checkSum;
         setCompleteCardNumber(completeCardNumber);
     }
 
@@ -55,24 +60,22 @@ public class CardNumber extends Bank {
      * Constructor for a cardNumber, which is unique to each account.
      *
      * @param accountIdentifier array of ints that are unique to each account.
-     * @param checkSum          int that validates the customer code.
      */
-    public CardNumber(int[] accountIdentifier, int checkSum) {
+    public CardNumber(int[] accountIdentifier) {
         super();
         this.accountIdentifier = accountIdentifier;
-        this.checkSum = checkSum;
         this.completeCardNumber = new int[16];
         int counter = 0;
-        for (int index = 0; index < completeCardNumber.length; index++) {
+        for (int index = 0; index < completeCardNumber.length - 1; index++) {
             if (index < 6) {
                 completeCardNumber[index] = super.getBin()[index];
-            } else if (index == 15) {
-                completeCardNumber[15] = checkSum;
             } else {
                 completeCardNumber[index] = accountIdentifier[counter];
                 counter++;
             }
         }
+        this.checkSum = checkSumMaker(completeCardNumber);
+        completeCardNumber[15] = checkSum;
         setCompleteCardNumber(completeCardNumber);
     }
 
@@ -88,6 +91,49 @@ public class CardNumber extends Bank {
             newAccountIdentifier[digit] = random.nextInt(10);
         }
         return newAccountIdentifier;
+    }
+
+    /**
+     * Method that finds the checkSum value of the card. This value is the only single digit that, when added to the
+     * control number, results in a number divisible by 10.
+     *
+     * @param completeCardNumber card number for which the checkSum will be found.
+     * @return the checkSum, which is the last digit of a complete card number, and verifies its authenticity.
+     */
+    private int checkSumMaker(int[] completeCardNumber) {
+        controlNumberCalc(completeCardNumber);
+        for (int possibleCheckSum = 0; possibleCheckSum < 10; possibleCheckSum++) {
+            if ((getControlNumber() + possibleCheckSum) % 10 == 0) {
+                setCheckSum(possibleCheckSum);
+                return checkSum;
+            }
+        }
+        return -1;
+    }
+
+    /**
+     * Method to calculate the control Number of a card according to the Luhn's algorithm. The calculation  of this
+     * value is done as following: for each number of the card number (besides the last digit which is the checkSum
+     * itself), if it is at an odd position (or even, in case of arrays), the value should be multiplied by 2. All
+     * values that are over 9, should be subtracted by 9. The control number is the result of the sum of all resulting
+     * digits.
+     *
+     * @param completeCardNumber the card number on which the algorithm will be applied
+     */
+    private void controlNumberCalc(int[] completeCardNumber) {
+        controlNumber = 0;
+        int[] controlArray = new int[15];
+        for (int index = 0; index < controlArray.length; index++) {
+            controlArray[index] = completeCardNumber[index];
+            if (index % 2 == 0) {
+                controlArray[index] *= 2;
+            }
+            if (controlArray[index] > 9) {
+                controlArray[index] -= 9;
+            }
+            controlNumber += controlArray[index];
+        }
+        setControlNumber(controlNumber);
     }
 
     /**
@@ -158,6 +204,24 @@ public class CardNumber extends Bank {
      */
     public void setCheckSum(int checkSum) {
         this.checkSum = checkSum;
+    }
+
+    /**
+     * Getter for the controlNumber
+     *
+     * @return value which, when added to checkSum, should be divisible by 10.
+     */
+    public int getControlNumber() {
+        return controlNumber;
+    }
+
+    /**
+     * Setter for the controlNumber
+     *
+     * @param controlNumber value that results from applying the Luhn algorythm to the card number.
+     */
+    public void setControlNumber(int controlNumber) {
+        this.controlNumber = controlNumber;
     }
 
 

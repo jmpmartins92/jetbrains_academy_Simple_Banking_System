@@ -291,6 +291,518 @@ files:
         }
     }
   learner_created: false
+- name: src/banking/Bank.java
+  visible: true
+  text: |
+    package banking;
+
+    import java.util.*;
+
+    /**
+     * Class Bank, defining different bank entities by its BIN code.
+     */
+    public class Bank {
+
+        /**
+         * array of digits that defines a bank. Typically, this code will have a length of 6, and the first digit will be 4.
+         */
+        private int[] bin;
+
+        /**
+         * List of customers that have an account of this bank.
+         */
+        List<Customer> customerList;
+
+        /**
+         * Default bank identification number, as per requested.
+         */
+        final static int[] DEFAULT_BIN = {4, 0, 0, 0, 0, 0};
+
+
+        /**
+         * Default constructor for a bank with the default bin.
+         */
+        public Bank() {
+            this.bin = DEFAULT_BIN;
+            this.customerList = new ArrayList<>();
+        }
+
+        /**
+         * Constructor for a bank with a specific bin code.
+         *
+         * @param bin int array of length 6, that is unique to each bank
+         */
+        public Bank(int[] bin) {
+            this.bin = bin;
+            this.customerList = new ArrayList<>();
+        }
+
+        /**
+         * Getter for the identification of the bank
+         *
+         * @return the bin of the bank.
+         */
+        public int[] getBin() {
+            return bin;
+        }
+
+        /**
+         * Setter for the identification of a bank
+         *
+         * @param bin array of ints corresponding to the bank identity code to be set.
+         */
+        public void setBin(int[] bin) {
+            this.bin = bin;
+        }
+
+
+    }
+  learner_created: true
+- name: src/banking/CardNumber.java
+  visible: true
+  text: |
+    package banking;
+
+
+    import java.util.Random;
+
+    /**
+     * Class CardNumber that extends Bank, which defines and creates an unique card number for customer identification.
+     * This code will both be pseudo random, and will have a set of constant digits, which are defined by the bank
+     * identification code.
+     */
+    public class CardNumber extends Bank {
+
+        /**
+         * Array of integers representing the customer account identifier. This code will always be unique, and always have
+         * a length of 9 digits.
+         */
+        private int[] accountIdentifier;
+
+
+        /**
+         * Array of 16 digits, that corresponds to the bank identification number joined with the account identifier and
+         * finally joined by the digit checkSum. This is the complete card number of an account, and will be unique.
+         */
+        private int[] completeCardNumber;
+
+        /**
+         * integer that validates the credit card number using the Luhn algorithm. It will be, at this stage, always 0.
+         */
+        private int checkSum;
+
+        /**
+         * Default constructor for the card number, which will assume a checksum of 0, and an accountIdentifier will be
+         * randomly generated.
+         */
+        public CardNumber() {
+            super();
+            this.accountIdentifier = accountIdentifierMaker();
+            this.checkSum = 0;
+            this.completeCardNumber = new int[16];
+            int counter = 0;
+            for (int index = 0; index < completeCardNumber.length; index++) {
+                if (index < 6) {
+                    completeCardNumber[index] = super.getBin()[index];
+                } else if (index == 15) {
+                    completeCardNumber[15] = checkSum;
+                } else {
+                    completeCardNumber[index] = accountIdentifier[counter];
+                    counter++;
+                }
+            }
+            setCompleteCardNumber(completeCardNumber);
+        }
+
+        /**
+         * Constructor for a cardNumber, which is unique to each account.
+         *
+         * @param accountIdentifier array of ints that are unique to each account.
+         * @param checkSum          int that validates the customer code.
+         */
+        public CardNumber(int[] accountIdentifier, int checkSum) {
+            super();
+            this.accountIdentifier = accountIdentifier;
+            this.checkSum = checkSum;
+            this.completeCardNumber = new int[16];
+            int counter = 0;
+            for (int index = 0; index < completeCardNumber.length; index++) {
+                if (index < 6) {
+                    completeCardNumber[index] = super.getBin()[index];
+                } else if (index == 15) {
+                    completeCardNumber[15] = checkSum;
+                } else {
+                    completeCardNumber[index] = accountIdentifier[counter];
+                    counter++;
+                }
+            }
+            setCompleteCardNumber(completeCardNumber);
+        }
+
+        /**
+         * Method that creates a random sequence of 9 digits, that will identify the customer.
+         *
+         * @return int array of length of 9, with randomly chosen single digits for each index.
+         */
+        private int[] accountIdentifierMaker() {
+            int[] newAccountIdentifier = new int[9];
+            for (int digit = 0; digit < newAccountIdentifier.length; digit++) {
+                Random random = new Random();
+                newAccountIdentifier[digit] = random.nextInt(10);
+            }
+            return newAccountIdentifier;
+        }
+
+        /**
+         * Overrides method toString to be able to translate the object card Number in a string of digits.
+         *
+         * @return String of 16 digits, corresponding to the card number.
+         */
+        @Override
+        public String toString() {
+            StringBuilder str = new StringBuilder();
+
+            for (int value : this.completeCardNumber) {
+                str.append(value);
+            }
+
+            return str.toString();
+        }
+
+        /**
+         * Getter for the completeCardNumber, which in a unique array of 16 digits, that will identify a customer account.
+         *
+         * @return a integer array, of length 16, each index contains a single digit.
+         */
+        public int[] getCompleteCardNumber() {
+            return completeCardNumber;
+        }
+
+        /**
+         * Setter for completeCardNumber. This will become the identifier of a customer account, universally unique.
+         *
+         * @param completeCardNumber an integer array, of length 16, each index must contain a single digit.
+         */
+        public void setCompleteCardNumber(int[] completeCardNumber) {
+            this.completeCardNumber = completeCardNumber;
+        }
+
+        /**
+         * Getter for the accountIdentifier, which identifies the account.
+         *
+         * @return an array of digits that are unique to the account.
+         */
+        public int[] getAccountIdentifier() {
+            return accountIdentifier;
+        }
+
+        /**
+         * Setter for the accountIdentifier.
+         *
+         * @param accountIdentifier array of 9 digits that are unique to each account.
+         */
+        public void setAccountIdentifier(int[] accountIdentifier) {
+            this.accountIdentifier = accountIdentifier;
+        }
+
+        /**
+         * Getter for checkSum, which retrieves the last digit of a card number, which serves as a validator.
+         *
+         * @return a digit that validates the code.
+         */
+        public int getCheckSum() {
+            return checkSum;
+        }
+
+        /**
+         * Setter for checkSum.
+         *
+         * @param checkSum digit that validates the account number.
+         */
+        public void setCheckSum(int checkSum) {
+            this.checkSum = checkSum;
+        }
+
+
+    }
+  learner_created: true
+- name: src/banking/LogIn.java
+  visible: true
+  text: |
+    package banking;
+
+    /**
+     * Class that handles the Login procedure.
+     */
+    public class LogIn {
+
+        /**
+         * Method that confirms if the login is valid, according to the given client,
+         * and its card number and pin.
+         *
+         * @param client            the customer trying to log in.
+         * @param inputCardNumber   the card number that has been given as user input.
+         * @param inputPIN          the pin that's been written during log in.
+         *
+         * @return  returns whether the client can proceed and log in, or not.
+         */
+        public static boolean isLoginValid(Customer client, String inputCardNumber, String inputPIN) {
+                return client.getCustomerCardNumber().equals(inputCardNumber) &&
+                        client.getPinString().equals(inputPIN);
+        }
+
+    }
+  learner_created: true
+- name: src/banking/Customer.java
+  visible: true
+  text: "package banking;\n\nimport java.util.Random;\n\n/**\n * Class Customer of\
+    \ bank, which extends class Bank.\n */\npublic class Customer extends CardNumber\
+    \ {\n\n    /**\n     * array of 4 ints that are generated with the CardNumber,\
+    \ which will be requested upon login.\n     */\n    private int[] pin;\n\n   \
+    \ /**\n     * int that represents current account balance (total money).\n   \
+    \  */\n    private int balance;\n\n    /**\n     * states if the user is logged\
+    \ in or not.\n     */\n    private boolean loggedIn = false;\n\n    /**\n    \
+    \ * Default constructor for a new customer, which will generate a new unique customerCode,\
+    \ and a random 4 digit pin.\n     * All new customers will have an account balance\
+    \ of 0 at the moment of account creation.\n     */\n    public Customer() {\n\
+    \        super();\n        this.pin = pinMaker();\n        this.balance = 0;\n\
+    \    }\n\n    /**\n     * Constructor for Customer class, associated with the\
+    \ respective bank, and includes all existing parameters of\n     * customer class.\n\
+    \     *\n     * @param pin       array of 4 digits that is associated to an account,\
+    \ and is required to login.\n     * @param balance   int that represents the money\
+    \ that the account has.\n     */\n    public Customer(int[] pin, int balance)\
+    \ {\n        super();\n        this.pin = pin;\n        this.balance = balance;\n\
+    \    }\n    \n    /**\n     * Method that returns the pin of a customer as a string,\
+    \ which facilitates other methods.\n     *\n     * @return a string consisting\
+    \ of 4 digits and no other chars, that is required as a key to login to an account.\n\
+    \     */\n    public String getPinString() {\n        StringBuilder str = new\
+    \ StringBuilder();\n\n        for (int value : this.pin) {\n            str.append(value);\n\
+    \        }\n        return str.toString();\n    }\n   \n    /**\n     * Method\
+    \ that makes a random sequence of 4 digits.\n     *\n     * @return an int array\
+    \ of length 4, representing the pin to login to the respective customer account.\n\
+    \     */\n    private int[] pinMaker() {\n        int[] newPin = new int[4];\n\
+    \        for (int digit = 0; digit < newPin.length; digit++) {\n            Random\
+    \ random = new Random();\n            newPin[digit] = random.nextInt(10);\n  \
+    \      }\n        return newPin;\n    }\n\n\n    /**\n     * Method that returns\
+    \ the customer's card number as a string.\n     *\n     * @return the customer's\
+    \ card number as a string.\n     */\n    public String getCustomerCardNumber()\
+    \ {\n        return super.toString();\n    }\n\n    /**\n     * Setter for login\
+    \ status of user.\n     * \n     * @param loggedIn true to set the user as logged\
+    \ in, false if logged out.\n     */\n    public void setLoggedIn(boolean loggedIn)\
+    \ {\n        this.loggedIn = loggedIn;\n    }\n\n    /**\n     * Checks if user\
+    \ is logged in.\n     * \n     * @return true if logged in, false is not.\n  \
+    \   */\n    public boolean isCustomerLoggedIn() {\n        return this.loggedIn;\n\
+    \    }\n\n    /**\n     * Setter for the pin of a customer account.\n     *\n\
+    \     * @return a 4 digit array that will be requested upon login.\n     */\n\
+    \    public int[] getPin() {\n        return pin;\n    }\n\n    /**\n     * Getter\
+    \ for the pin of a customer account.\n     *\n     * @param pin a int array with\
+    \ a length of 4, that will be requested upon login.\n     */\n    public void\
+    \ setPin(int[] pin) {\n        this.pin = pin;\n    }\n\n    /**\n     * Getter\
+    \ for the current account balance.\n     *\n     * @return int value of the money\
+    \ that the account contains.\n     */\n    public int getBalance() {\n       \
+    \ return balance;\n    }\n\n    /**\n     * Setter for the account balance.\n\
+    \     *\n     * @param balance int value that represents the money the account\
+    \ contains.\n     */\n    public void setBalance(int balance) {\n        this.balance\
+    \ = balance;\n    }\n}\n"
+  learner_created: true
+- name: src/banking/Menu.java
+  visible: true
+  text: |+
+    package banking;
+
+
+    import java.util.Scanner;
+
+    /**
+     * Class for the menu displayed to the user.
+     */
+    public class Menu {
+
+        /**
+         * Scans user input.
+         */
+        Scanner scanner = new Scanner(System.in);
+
+        /**
+         * Bank entity for which the menu corresponds and will create customers to.
+         */
+        private Bank bank;
+
+        /**
+         * Int that will define which action is requested by the user.
+         */
+        private static int option;
+
+        /**
+         * The customer which is using the program at that moment.
+         */
+        private Customer currentCustomer;
+
+        /**
+         * Identifier for the home menu.
+         */
+        private final static int HOME_MENU_ID = 10;
+
+        /**
+         * Identifier for the account menu.
+         */
+        private final static int ACCOUNT_MENU_ID = 20;
+
+        /**
+         * Constructor for a Menu.
+         *
+         * @param bank which the menu represents and will create customers to.
+         */
+        public Menu(Bank bank) {
+            this.bank = bank;
+        }
+
+        /**
+         * Method that presents the home menu, and requests an option in the form of a digit. This menu might be
+         * called back at certain stages, for example, after the creation of a new account, or after logging out.
+         */
+        private void homeMenu() {
+            do {
+                System.out.println("1. Create an account");
+                System.out.println("2. Log into account");
+                System.out.println("0. Exit");
+                try {
+                    Menu.option = Integer.parseInt(scanner.nextLine());
+                } catch (NumberFormatException e) {
+                    System.out.println("Please type a number corresponding to the pretended option");
+                    Menu.option = -1;
+                }
+            } while (Menu.option < 0 || Menu.option > 2);
+            setOption(Menu.HOME_MENU_ID + Menu.option);
+            menuOptions();
+        }
+
+        /**
+         * Method that presents the account menu, and request an option in the form of a digit to the user. This menu is
+         * called upon a valid user login.
+         */
+        private void accountMenu() {
+            do {
+                System.out.println("1. Balance");
+                System.out.println("2. Log out");
+                System.out.println("0. Exit");
+                try {
+                    Menu.option = Integer.parseInt(scanner.nextLine());
+                } catch (NumberFormatException e) {
+                    System.out.println("Please type a number corresponding to the pretended option");
+                    Menu.option = -1;
+                }
+            } while (Menu.option < 0 || Menu.option > 2);
+            setOption(Menu.ACCOUNT_MENU_ID + Menu.option);
+            menuOptions();
+        }
+
+        /**
+         * Method that will dictate the flow of the program, according to the options chosen by the user. Options with
+         * "1" as the first digit correspond to the home menu, and options with "2" as the first digit correspond to the
+         * account menu. The user may always choose to exit the program at any time, by entering "0".
+         */
+        public void menuOptions() {
+            switch(Menu.option) {
+                case 0:
+                    setOption(0);
+                    homeMenu();
+                case 10:
+                case 20:
+                    System.out.println("Bye!");
+                    System.exit(0);
+                case 11:
+                    createNewCustomer();
+                    setOption(0);
+                    menuOptions();
+                case 12:
+                    login();
+                    setOption(0);
+                    menuOptions();
+
+                case 21:
+                    System.out.printf("\nBalance: %d\n", currentCustomer.getBalance());
+                    setOption(0);
+                    accountMenu();
+                case 22:
+                    currentCustomer.setLoggedIn(false);
+                    System.out.println("You have successfully logged out!\n");
+                    setOption(0);
+                    menuOptions();
+                default:
+                    System.out.println("error occurred, invalid option");
+                    System.exit(0);
+
+            }
+        }
+
+        /**
+         * Creates a new customer and displays its card number and PIN. Adds the customer to the bank's customer list.
+         */
+        private void createNewCustomer() {
+            Customer customer = new Customer();
+            System.out.println("Your card has been created.");
+            System.out.println("Your card number: ");
+            System.out.println(customer.getCustomerCardNumber());
+            System.out.println("Your card PIN: ");
+            System.out.println(customer.getPinString());
+            bank.customerList.add(customer);
+            currentCustomer = customer;
+        }
+
+        /**
+         * Asks for the user's card number and PIN to validate if they can log in and access the account menu. If validated,
+         * allows the user to log in and proceed.
+         */
+        private void login() {
+            System.out.println("Enter your card number: ");
+            String inputCardNumber = scanner.nextLine();
+            System.out.println("Enter your PIN: ");
+            String inputPIN = scanner.nextLine();
+            boolean login = false;
+            for (Customer client : bank.customerList) {
+                login = LogIn.isLoginValid(client, inputCardNumber, inputPIN);
+
+                if (login) {
+                    currentCustomer = client;
+                    currentCustomer.setLoggedIn(true);
+                    System.out.println("\nYou have successfully logged in!");
+                    accountMenu();
+                }
+
+            } if (!login) {
+                System.out.println("\nWrong card number or PIN.");
+            }
+        }
+
+        /**
+         * Getter for the current option value.
+         *
+         * @return value that represents the current option selected by the user.
+         */
+        public int getOption() {
+            return Menu.option;
+        }
+
+        /**
+         * Setter for the option displayed for the menu.
+         *
+         * @param option int value that will be within certain rules, and will dictate the flow of the program.
+         */
+        public void setOption(int option) {
+            Menu.option = option;
+        }
+    }
+
+
+
+
+
+  learner_created: true
 feedback_link: https://hyperskill.org/projects/93/stages/516/implement
-status: Unchecked
+status: Solved
+feedback:
+  message: Congratulations! Continue on <a href="https://hyperskill.org/projects/93/stages/516/implement">JetBrains
+    Academy</a>
+  time: Sun, 11 Apr 2021 17:33:56 UTC
 record: -1
